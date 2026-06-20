@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 580" width="920" height="580" font-family="'SF Mono','Fira Mono','Consolas',monospace">
+
+  <!-- background -->
+  <rect width="920" height="580" fill="#0d1117"/>
+
+  <!-- ── column rule ── -->
+  <line x1="460" y1="48" x2="460" y2="540" stroke="#21262d" stroke-width="1"/>
+
+  <!-- ── column headers ── -->
+  <text x="230" y="36" text-anchor="middle" fill="#484f58" font-size="10" letter-spacing="2.5" font-weight="600">YOUR APP</text>
+  <text x="690" y="36" text-anchor="middle" fill="#484f58" font-size="10" letter-spacing="2.5" font-weight="600">STATEWAVE  ·  localhost:8100</text>
+
+  <!--
+    LAYOUT (Y positions):
+      56  Browser
+     114  ↓ arrow
+     120  FastAPI Routes
+     186  ↓ arrow
+     200  StatewaveClient          ←→ (Y=216 out / Y=236 in)  ←→ Statewave API   200
+     266  ↓ arrow
+     280  LLMService               (Y=309 record_episode out)  ←→ [Statewave API via Y=329 row]
+     346  ↓ arrow
+     360  OpenAI LLM
+
+     RIGHT:
+     200  Statewave API
+     280  Memory Engine             (Y=280–346 spans below)
+     360  PostgreSQL + pgvector
+  -->
+
+  <!-- ══════════════════ LEFT COLUMN ══════════════════ -->
+
+  <!-- Browser -->
+  <rect x="145" y="56" width="170" height="46" rx="3" fill="none" stroke="#30363d" stroke-width="1.5"/>
+  <text x="230" y="76" text-anchor="middle" fill="#c9d1d9" font-size="11" font-weight="600">Browser</text>
+  <text x="230" y="92" text-anchor="middle" fill="#484f58" font-size="10">localhost:8000</text>
+
+  <!-- Browser ↓ FastAPI -->
+  <line x1="230" y1="102" x2="230" y2="133" stroke="#30363d" stroke-width="1.5"/>
+  <polygon points="226,129 230,136 234,129" fill="#30363d"/>
+  <text x="244" y="121" fill="#484f58" font-size="9">POST /api/v1/chat</text>
+
+  <!-- FastAPI Routes -->
+  <rect x="55" y="136" width="350" height="46" rx="3" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <text x="230" y="156" text-anchor="middle" fill="#c9d1d9" font-size="11" font-weight="600">FastAPI  ·  routes.py</text>
+  <text x="230" y="172" text-anchor="middle" fill="#484f58" font-size="10">POST /chat  ·  GET /memory/{user_id}  ·  POST /compare</text>
+
+  <!-- FastAPI ↓ StatewaveClient -->
+  <line x1="230" y1="182" x2="230" y2="213" stroke="#30363d" stroke-width="1.5"/>
+  <polygon points="226,209 230,216 234,209" fill="#30363d"/>
+
+  <!-- StatewaveClient -->
+  <rect x="55" y="216" width="350" height="46" rx="3" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <text x="230" y="236" text-anchor="middle" fill="#c9d1d9" font-size="11" font-weight="600">StatewaveClient</text>
+  <text x="230" y="252" text-anchor="middle" fill="#484f58" font-size="10">services/statewave.py  ·  retry + exponential backoff</text>
+
+  <!-- StatewaveClient ↓ LLMService -->
+  <line x1="230" y1="262" x2="230" y2="293" stroke="#30363d" stroke-width="1.5"/>
+  <polygon points="226,289 230,296 234,289" fill="#30363d"/>
+
+  <!-- LLMService -->
+  <rect x="55" y="296" width="350" height="46" rx="3" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <text x="230" y="316" text-anchor="middle" fill="#c9d1d9" font-size="11" font-weight="600">LLMService</text>
+  <text x="230" y="332" text-anchor="middle" fill="#484f58" font-size="10">services/llm.py  ·  tiktoken  ·  injects assembled_context</text>
+
+  <!-- LLMService ↓ OpenAI -->
+  <line x1="230" y1="342" x2="230" y2="373" stroke="#30363d" stroke-width="1.5"/>
+  <polygon points="226,369 230,376 234,369" fill="#30363d"/>
+
+  <!-- OpenAI LLM -->
+  <rect x="55" y="376" width="350" height="46" rx="3" fill="none" stroke="#30363d" stroke-width="1.5"/>
+  <text x="230" y="396" text-anchor="middle" fill="#c9d1d9" font-size="11" font-weight="600">OpenAI-compatible LLM</text>
+  <text x="230" y="412" text-anchor="middle" fill="#484f58" font-size="10">gpt-4o-mini  ·  any OpenAI-compatible endpoint</text>
+
+  <!-- ══════════════════ STEP BADGES ══════════════════ -->
+
+  <!-- Step 1 — at StatewaveClient row -->
+  <circle cx="28" cy="239" r="11" fill="#161b22" stroke="#388bfd" stroke-width="1.5"/>
+  <text x="28" y="243" text-anchor="middle" fill="#388bfd" font-size="10" font-weight="700">1</text>
+
+  <!-- Step 2 — at LLMService row -->
+  <circle cx="28" cy="319" r="11" fill="#161b22" stroke="#c9d1d9" stroke-width="1.5"/>
+  <text x="28" y="323" text-anchor="middle" fill="#c9d1d9" font-size="10" font-weight="700">2</text>
+
+  <!-- Step 3 — back to StatewaveClient to record -->
+  <circle cx="28" cy="399" r="11" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="28" y="403" text-anchor="middle" fill="#3fb950" font-size="10" font-weight="700">3</text>
+
+  <!-- ══════════════════ RIGHT COLUMN ══════════════════ -->
+
+  <!-- Statewave API — same Y band as StatewaveClient (216–262) -->
+  <rect x="515" y="216" width="350" height="46" rx="3" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <text x="690" y="236" text-anchor="middle" fill="#c9d1d9" font-size="11" font-weight="600">Statewave API</text>
+  <text x="690" y="252" text-anchor="middle" fill="#484f58" font-size="10">POST /v1/context  ·  POST /v1/episodes  ·  POST /v1/memories/compile</text>
+
+  <!-- Statewave API ↓ Memory Engine -->
+  <line x1="690" y1="262" x2="690" y2="293" stroke="#30363d" stroke-width="1.5"/>
+  <polygon points="686,289 690,296 694,289" fill="#30363d"/>
+
+  <!-- Memory Engine -->
+  <rect x="515" y="296" width="350" height="46" rx="3" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <text x="690" y="316" text-anchor="middle" fill="#c9d1d9" font-size="11" font-weight="600">Memory Engine</text>
+  <text x="690" y="332" text-anchor="middle" fill="#484f58" font-size="10">extract  ·  rank by score  ·  compile  ·  token-bound</text>
+
+  <!-- Memory Engine ↓ PostgreSQL -->
+  <line x1="690" y1="342" x2="690" y2="373" stroke="#30363d" stroke-width="1.5"/>
+  <polygon points="686,369 690,376 694,369" fill="#30363d"/>
+
+  <!-- PostgreSQL + pgvector -->
+  <rect x="515" y="376" width="350" height="46" rx="3" fill="none" stroke="#30363d" stroke-width="1.5"/>
+  <text x="690" y="396" text-anchor="middle" fill="#c9d1d9" font-size="11" font-weight="600">PostgreSQL + pgvector</text>
+  <text x="690" y="412" text-anchor="middle" fill="#484f58" font-size="10">episodes  ·  memories  ·  receipts</text>
+
+  <!-- ══════════════════ CROSS ARROWS ══════════════════ -->
+
+  <!--
+    Arrow A  get_context()
+    Out: StatewaveClient right edge at Y=228 (upper band)
+    In:  Statewave API left edge at Y=228
+    Return: Y=252 (lower band), dashed, back left
+  -->
+
+  <!-- outbound: get_context -->
+  <line x1="405" y1="228" x2="515" y2="228" stroke="#388bfd" stroke-width="1.5"/>
+  <polygon points="511,224 518,228 511,232" fill="#388bfd"/>
+  <text x="460" y="220" text-anchor="middle" fill="#388bfd" font-size="9" font-weight="600">get_context( subject_id, max_tokens )</text>
+
+  <!-- return: assembled_context -->
+  <line x1="515" y1="252" x2="405" y2="252" stroke="#388bfd" stroke-width="1" stroke-dasharray="4,3"/>
+  <polygon points="409,248 402,252 409,256" fill="#388bfd"/>
+  <text x="460" y="270" text-anchor="middle" fill="#484f58" font-size="9">assembled_context  ·  token_estimate</text>
+
+  <!--
+    Arrow B  record_episode()
+    Fires after the LLM call — route from LLMService right edge
+    at Y=319, across to Statewave API left edge at Y=319.
+    We use a simple straight horizontal — both boxes align at the same Y band.
+  -->
+  <line x1="405" y1="319" x2="515" y2="319" stroke="#3fb950" stroke-width="1.5"/>
+  <polygon points="511,315 518,319 511,323" fill="#3fb950"/>
+  <text x="460" y="311" text-anchor="middle" fill="#3fb950" font-size="9" font-weight="600">record_episode( user_msg, reply )</text>
+  <text x="460" y="335" text-anchor="middle" fill="#484f58" font-size="9">fire-and-forget  ·  non-fatal on error</text>
+
+  <!-- ══════════════════ LEGEND ══════════════════ -->
+
+  <rect x="55" y="456" width="810" height="1" fill="#21262d"/>
+
+  <line x1="55" y1="480" x2="82" y2="480" stroke="#388bfd" stroke-width="1.5"/>
+  <text x="88" y="484" fill="#484f58" font-size="9">get_context  /  assembled_context response</text>
+
+  <line x1="310" y1="480" x2="337" y2="480" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="343" y="484" fill="#484f58" font-size="9">record_episode  (non-fatal)</text>
+
+  <line x1="530" y1="480" x2="557" y2="480" stroke="#30363d" stroke-width="1.5"/>
+  <text x="563" y="484" fill="#484f58" font-size="9">internal call</text>
+
+  <line x1="55" y1="508" x2="82" y2="508" stroke="#388bfd" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="88" y="512" fill="#484f58" font-size="9">return value  (dashed)</text>
+
+  <!-- step key -->
+  <circle cx="310" cy="508" r="8" fill="#161b22" stroke="#388bfd" stroke-width="1.5"/>
+  <text x="310" y="512" text-anchor="middle" fill="#388bfd" font-size="8" font-weight="700">1</text>
+  <text x="324" y="512" fill="#484f58" font-size="9">fetch context</text>
+
+  <circle cx="430" cy="508" r="8" fill="#161b22" stroke="#c9d1d9" stroke-width="1.5"/>
+  <text x="430" y="512" text-anchor="middle" fill="#c9d1d9" font-size="8" font-weight="700">2</text>
+  <text x="444" y="512" fill="#484f58" font-size="9">LLM call</text>
+
+  <circle cx="530" cy="508" r="8" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="530" y="512" text-anchor="middle" fill="#3fb950" font-size="8" font-weight="700">3</text>
+  <text x="544" y="512" fill="#484f58" font-size="9">record episode</text>
+
+</svg>

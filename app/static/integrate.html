@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statewave · Integrate</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d12;
+      --surface: #16161f;
+      --surface2: #1e1e2a;
+      --surface3: #232333;
+      --border: #2a2a3a;
+      --accent: #7c6af7;
+      --accent-dim: rgba(124,106,247,0.13);
+      --good: #34d399;
+      --good-dim: rgba(52,211,153,0.10);
+      --text: #e8e8f0;
+      --text-muted: #8888a8;
+      --text-dim: #444460;
+      --radius: 12px;
+      --sans: 'Inter', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── header ── */
+    header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 24px; border-bottom: 1px solid var(--border);
+      background: var(--surface); position: sticky; top: 0; z-index: 10;
+    }
+    .logo { font-size: 15px; font-weight: 700; letter-spacing: -.3px; }
+    .logo span { color: var(--accent); }
+    .spacer { flex: 1; }
+    .header-links { display: flex; gap: 6px; }
+    .header-links a {
+      font-size: 12px; color: var(--text-muted); text-decoration: none;
+      padding: 5px 10px; border-radius: 7px; border: 1px solid var(--border);
+      transition: all .15s;
+    }
+    .header-links a:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); }
+    .header-links a.active { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); }
+
+    /* ── layout ── */
+    .page {
+      display: flex;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      gap: 48px;
+    }
+
+    /* ── sidebar nav ── */
+    .sidenav {
+      width: 200px;
+      flex-shrink: 0;
+      padding: 32px 0;
+      position: sticky;
+      top: 57px;
+      height: calc(100vh - 57px);
+      overflow-y: auto;
+    }
+    .sidenav-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .6px;
+      text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px;
+    }
+    .sidenav a {
+      display: block; font-size: 13px; color: var(--text-muted);
+      text-decoration: none; padding: 5px 10px; border-radius: 7px;
+      margin-bottom: 2px; transition: all .15s;
+    }
+    .sidenav a:hover { color: var(--text); background: var(--surface2); }
+    .sidenav a.active { color: var(--accent); background: var(--accent-dim); }
+
+    /* ── main content ── */
+    .content {
+      flex: 1;
+      padding: 40px 0 80px;
+      min-width: 0;
+    }
+
+    /* hero */
+    .hero { margin-bottom: 48px; }
+    .hero h1 {
+      font-size: clamp(24px, 3.5vw, 36px); font-weight: 800;
+      letter-spacing: -.5px; line-height: 1.2; margin-bottom: 14px;
+    }
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, #7c6af7, #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p { font-size: 15px; color: var(--text-muted); max-width: 560px; }
+
+    /* install bar */
+    .install-bar {
+      display: flex; align-items: center; gap: 0;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; margin-top: 20px;
+      max-width: 480px;
+    }
+    .install-bar code {
+      font-family: var(--mono); font-size: 13px; color: var(--good);
+      padding: 12px 16px; flex: 1;
+    }
+    .install-bar button {
+      padding: 0 16px; height: 100%; border: none; border-left: 1px solid var(--border);
+      background: var(--surface3); color: var(--text-muted); font-size: 12px;
+      cursor: pointer; font-family: var(--sans); transition: all .15s; white-space: nowrap;
+    }
+    .install-bar button:hover { background: var(--accent-dim); color: var(--accent); }
+
+    /* section */
+    .section { margin-bottom: 56px; scroll-margin-top: 80px; }
+    .section-tag {
+      display: inline-block; font-size: 11px; font-weight: 700;
+      letter-spacing: .5px; text-transform: uppercase;
+      color: var(--accent); background: var(--accent-dim);
+      border: 1px solid rgba(124,106,247,.2);
+      padding: 3px 9px; border-radius: 6px; margin-bottom: 10px;
+    }
+    h2 {
+      font-size: 22px; font-weight: 700; letter-spacing: -.3px;
+      margin-bottom: 10px;
+    }
+    .section > p {
+      font-size: 14px; color: var(--text-muted); margin-bottom: 20px;
+      max-width: 560px;
+    }
+
+    /* how it works steps */
+    .steps { display: flex; flex-direction: column; gap: 0; margin-bottom: 28px; }
+    .step { display: flex; gap: 16px; position: relative; }
+    .step:not(:last-child)::before {
+      content: ''; position: absolute; left: 15px; top: 36px;
+      width: 2px; height: calc(100% - 8px); background: var(--border);
+    }
+    .step-num {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--accent-dim); border: 1px solid rgba(124,106,247,.3);
+      color: var(--accent); font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px; position: relative; z-index: 1;
+    }
+    .step-body { padding: 4px 0 24px; }
+    .step-body strong { font-size: 14px; display: block; margin-bottom: 4px; }
+    .step-body p { font-size: 13px; color: var(--text-muted); }
+
+    /* code block */
+    .code-block {
+      position: relative;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .code-block-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px; border-bottom: 1px solid var(--border);
+      background: var(--surface3);
+    }
+    .code-lang {
+      font-size: 11px; font-weight: 700; letter-spacing: .5px;
+      text-transform: uppercase; color: var(--text-dim);
+    }
+    .copy-btn {
+      font-size: 12px; color: var(--text-muted); background: none; border: none;
+      cursor: pointer; font-family: var(--sans); padding: 2px 8px;
+      border-radius: 5px; transition: all .15s;
+    }
+    .copy-btn:hover { color: var(--accent); background: var(--accent-dim); }
+    .copy-btn.copied { color: var(--good); }
+
+    pre {
+      padding: 18px 20px; overflow-x: auto;
+      font-family: var(--mono); font-size: 13px; line-height: 1.65;
+    }
+    pre::-webkit-scrollbar { height: 4px; }
+    pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* token colours */
+    .kw  { color: #c084fc; }  /* keyword */
+    .fn  { color: #60a5fa; }  /* function */
+    .str { color: #86efac; }  /* string */
+    .cm  { color: #4b5563; font-style: italic; }  /* comment */
+    .num { color: #fbbf24; }  /* number */
+    .cls { color: #f9a8d4; }  /* class */
+    .op  { color: #94a3b8; }  /* operator / punctuation */
+
+    /* diff inline */
+    .diff-add { background: rgba(52,211,153,.08); display: block; }
+    .diff-del { background: rgba(249,112,102,.08); display: block; }
+
+    /* callout */
+    .callout {
+      border-left: 3px solid var(--accent);
+      background: var(--accent-dim);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .callout strong { color: var(--text); }
+
+    /* pattern tabs */
+    .tabs { display: flex; gap: 4px; margin-bottom: 0; }
+    .tab-btn {
+      font-size: 13px; padding: 7px 14px; border-radius: 8px 8px 0 0;
+      border: 1px solid var(--border); border-bottom: none;
+      background: var(--surface2); color: var(--text-muted);
+      cursor: pointer; font-family: var(--sans); transition: all .15s;
+    }
+    .tab-btn.active { background: var(--surface3); color: var(--text); border-color: var(--border); }
+    .tab-btn:hover:not(.active) { color: var(--accent); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .tab-content {
+      border: 1px solid var(--border); border-radius: 0 var(--radius) var(--radius) var(--radius);
+      overflow: hidden;
+    }
+
+    /* comparison table */
+    table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+      margin-bottom: 20px;
+    }
+    th {
+      text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700;
+      letter-spacing: .5px; text-transform: uppercase; color: var(--text-dim);
+      border-bottom: 1px solid var(--border); background: var(--surface2);
+    }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+    td:first-child { color: var(--text); font-weight: 500; }
+    tr:last-child td { border-bottom: none; }
+
+    /* footer */
+    footer {
+      text-align: center; padding: 24px; font-size: 12px; color: var(--text-dim);
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">state<span>wave</span></div>
+  <div class="spacer"></div>
+  <div class="header-links">
+    <a href="/">Assistant</a>
+    <a href="/demo">Demo</a>
+    <a href="/integrate" class="active">Integrate</a>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- sidenav -->
+  <nav class="sidenav">
+    <div class="sidenav-label">On this page</div>
+    <a href="#how-it-works" class="active">How it works</a>
+    <a href="#install">Install</a>
+    <a href="#pattern-1">Pattern 1 · Wrapper</a>
+    <a href="#pattern-2">Pattern 2 · Middleware</a>
+    <a href="#pattern-3">Pattern 3 · LangChain</a>
+    <a href="#api-reference">API reference</a>
+    <a href="#env-vars">Env vars</a>
+  </nav>
+
+  <!-- main -->
+  <div class="content">
+
+    <!-- hero -->
+    <div class="hero">
+      <h1>Add persistent memory to<br><em>any chatbot in minutes.</em></h1>
+      <p>
+        Statewave gives your LLM ranked, token-bounded memory across sessions —
+        without vector databases, prompt stuffing, or custom retrieval pipelines.
+        Copy one file. Add three lines.
+      </p>
+      <div class="install-bar">
+        <code>pip install httpx openai</code>
+        <button onclick="copyText('pip install httpx openai', this)">Copy</button>
+      </div>
+    </div>
+
+    <!-- how it works -->
+    <div class="section" id="how-it-works">
+      <span class="section-tag">Concept</span>
+      <h2>How it works</h2>
+      <p>Three calls wrap every conversation turn. That's the entire integration surface.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>GET context — before the LLM call</strong>
+            <p>POST to <code>/v1/context</code> with the user ID and current message.
+            Statewave returns an <code>assembled_context</code> string — the highest-ranked
+            facts about this user that fit within your token budget.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Inject into system prompt — call the LLM</strong>
+            <p>Append the context string to your system prompt. The model sees what it
+            knows about this user without you managing retrieval, ranking, or chunking.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>RECORD episode — after the LLM response</strong>
+            <p>POST the user message + assistant reply to <code>/v1/episodes</code>.
+            Statewave extracts structured memory facts asynchronously — preferences,
+            open issues, profile facts — ready for the next session.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Token budget:</strong> Statewave never returns more context than you allow.
+        Set <code>max_tokens: 800</code> and it fits the most relevant facts into 800 tokens —
+        so your LLM context window stays predictable even after 100 sessions.
+      </div>
+    </div>
+
+    <!-- install -->
+    <div class="section" id="install">
+      <span class="section-tag">Setup</span>
+      <h2>Install</h2>
+      <p>Download <a href="/static/statewave_integration.py" style="color:var(--accent)">statewave_integration.py</a> into your project root, then set two env vars.</p>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-lang">shell</span>
+          <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
+        </div>
+        <pre><span class="cm"># 1. Copy the integration file</span>
+curl -O http://localhost:8000/static/statewave_integration.py
+
+<span class="cm"># 2. Set env vars (.env or shell)</span>
+OPENAI_API_KEY=sk-...
+STATEWAVE_BASE_URL=http://localhost:8100   <span class="cm"># or your hosted URL</span>
+STATEWAVE_API_KEY=                         <span class="cm"># optional for self-hosted</span></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-lang">shell — smoke test</span>
+          <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
+        </div>
+        <pre>python statewave_integration.py</pre>
+      </div>
+    </div>
+
+    <!-- pattern 1 -->
+    <div class="section" id="pattern-1">
+      <span class="section-tag">Pattern 1</span>
+      <h2>Plain async wrapper</h2>
+      <p>Works with FastAPI, Django Async, raw asyncio — any Python async context.
+      Replace your existing <code>openai.chat()</code> call with <code>memory_chat()</code>.</p>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-lang">python — before</span>
+          <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
+        </div>
+        <pre><span class="kw">from</span> openai <span class="kw">import</span> AsyncOpenAI
+
+client = AsyncOpenAI()
+
+<span class="kw">async def</span> <span class="fn">chat</span>(user_id: <span class="cls">str</span>, message: <span class="cls">str</span>) -> <span class="cls">str</span>:
+    completion = <span class="kw">await</span> client.chat.completions.create(
+        model=<span class="str">"gpt-4o-mini"</span>,
+        messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: message}],
+    )
+    <span class="kw">return</span> completion.choices[<span class="num">0</span>].message.content</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-lang">python — after (3 lines changed)</span>
+          <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
+        </div>
+        <pre><span class="diff-add"><span class="kw">from</span> statewave_integration <span class="kw">import</span> memory_chat</span>
+
+<span class="kw">async def</span> <span class="fn">chat</span>(user_id: <span class="cls">str</span>, message: <span class="cls">str</span>) -> <span class="cls">str</span>:
+<span class="diff-add">    <span class="kw">return</span> <span class="kw">await</span> <span class="fn">memory_chat</span>(user_id=user_id, message=message)</span>
+<span class="cm">    # ↑ fetches memory, calls LLM, records episode — all in one call</span></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-lang">python — with custom system prompt</span>
+          <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
+        </div>
+        <pre>reply = <span class="kw">await</span> <span class="fn">memory_chat</span>(
+    user_id=<span class="str">"alice"</span>,
+    message=<span class="str">"What was I debugging last week?"</span>,
+    system_prompt=<span class="str">"You are a senior engineer helping with code reviews."</span>,
+    model=<span class="str">"gpt-4o"</span>,
+)</pre>
+      </div>
+    </div>
+
+    <!-- pattern 2 -->
+    <div class="section" id="pattern-2">
+      <span class="section-tag">Pattern 2</span>
+      <h2>FastAPI middleware</h2>
+      <p>Zero changes to your existing route handlers. The middleware intercepts every
+      POST to <code>/chat</code>, fetches memory before your handler runs, and records
+      the episode after it responds.</p>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-lang">python — main.py (1 line added)</span>
+          <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
+        </div>
+        <pre><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+<span class="diff-add"><span class="kw">from</span> statewave_integration <span class="kw">import</span> StatewaveMemoryMiddleware</span>
+
+app = FastAPI()
+<span class="diff-add">app.add_middleware(StatewaveMemoryMiddleware)</span>
+
+<span class="op">@</span>app.post(<span class="str">"/chat"</span>)
+<span class="kw">async def</span> <span class="fn">chat</span>(req: ChatRequest, request: Request):
+    <span class="cm"># memory_context is injected into request.state by the middleware</span>
+    context = getattr(request.state, <span class="str">"memory_context"</span>, <span class="str">""</span>)
+    reply = <span class="kw">await</span> <span class="fn">llm_call</span>(req.message, system_context=context)
+    <span class="kw">return</span> {<span class="str">"response"</span>: reply}</pre>
+      </div>
+
+      <div class="callout">
+        <strong>Custom path:</strong> By default the middleware watches <code>/chat</code>.
+        Pass <code>chat_path="/api/v1/messages"</code> to <code>add_middleware()</code>
+        to match your route.
+      </div>
+    </div>
+
+    <!-- pattern 3 -->
+    <div class="section" id="pattern-3">
+      <span class="section-tag">Pattern 3</span>
+      <h2>LangChain chain step</h2>
+      <p>Drop <code>statewave_memory_step</code> at the front of any LCEL chain.
+      It fetches memory and injects it as a <code>memory_context</code> variable
+      your prompt template can reference.</p>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-lang">python</span>
+          <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
+        </div>
+        <pre><span class="kw">from</span> langchain_openai <span class="kw">import</span> ChatOpenAI
+<span class="kw">from</span> langchain_core.prompts <span class="kw">import</span> ChatPromptTemplate
+<span class="kw">from</span> langchain_core.output_parsers <span class="kw">import</span> StrOutputParser
+<span class="diff-add"><span class="kw">from</span> statewave_integration <span class="kw">import</span> statewave_memory_step</span>
+
+prompt = ChatPromptTemplate.from_messages([
+    (<span class="str">"system"</span>, <span class="str">"You are a helpful assistant.\n\n{memory_context}"</span>),
+    (<span class="str">"human"</span>,  <span class="str">"{message}"</span>),
+])
+
+<span class="diff-add">chain = statewave_memory_step | prompt | ChatOpenAI() | StrOutputParser()</span>
+
+reply = <span class="kw">await</span> chain.ainvoke({
+    <span class="str">"user_id"</span>: <span class="str">"alice"</span>,
+    <span class="str">"message"</span>: <span class="str">"What was I building last week?"</span>,
+})</pre>
+      </div>
+    </div>
+
+    <!-- API reference -->
+    <div class="section" id="api-reference">
+      <span class="section-tag">Reference</span>
+      <h2>Statewave API endpoints</h2>
+      <p>The two endpoints you'll call directly (the integration file wraps these).</p>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-lang">POST /v1/context — fetch ranked memory</span>
+          <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
+        </div>
+        <pre><span class="cm"># Request</span>
+{
+  <span class="str">"subject_id"</span>: <span class="str">"alice"</span>,
+  <span class="str">"task"</span>:       <span class="str">"What was I debugging last week?"</span>,  <span class="cm">// optional — improves ranking</span>
+  <span class="str">"max_tokens"</span>: <span class="num">800</span>
+}
+
+<span class="cm"># Response</span>
+{
+  <span class="str">"assembled_context"</span>: <span class="str">"User is a senior backend engineer at Acme..."</span>,
+  <span class="str">"token_estimate"</span>:    <span class="num">312</span>,
+  <span class="str">"facts"</span>: [
+    { <span class="str">"kind"</span>: <span class="str">"profile_fact"</span>, <span class="str">"content"</span>: <span class="str">"..."</span>, <span class="str">"score"</span>: <span class="num">0.94</span> },
+    ...
+  ]
+}</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-lang">POST /v1/episodes — record a turn</span>
+          <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
+        </div>
+        <pre>{
+  <span class="str">"subject_id"</span>: <span class="str">"alice"</span>,
+  <span class="str">"source"</span>:     <span class="str">"chat"</span>,
+  <span class="str">"type"</span>:       <span class="str">"conversation"</span>,
+  <span class="str">"payload"</span>: {
+    <span class="str">"messages"</span>: [
+      { <span class="str">"role"</span>: <span class="str">"user"</span>,      <span class="str">"content"</span>: <span class="str">"What was I debugging?"</span> },
+      { <span class="str">"role"</span>: <span class="str">"assistant"</span>, <span class="str">"content"</span>: <span class="str">"Last week you were investigating..."</span> }
+    ]
+  },
+  <span class="str">"metadata"</span>: {}
+}</pre>
+      </div>
+
+      <table>
+        <tr><th>Endpoint</th><th>When to call</th><th>Fatal if fails?</th></tr>
+        <tr><td>POST /v1/context</td><td>Before every LLM call</td><td>No — fall back to empty context</td></tr>
+        <tr><td>POST /v1/episodes</td><td>After every LLM response</td><td>No — fire and forget</td></tr>
+        <tr><td>POST /v1/memories/compile</td><td>On-demand or scheduled</td><td>No</td></tr>
+        <tr><td>GET /v1/memories/search</td><td>Inspect / debug</td><td>No</td></tr>
+      </table>
+    </div>
+
+    <!-- env vars -->
+    <div class="section" id="env-vars">
+      <span class="section-tag">Config</span>
+      <h2>Environment variables</h2>
+
+      <table>
+        <tr><th>Variable</th><th>Default</th><th>Purpose</th></tr>
+        <tr><td>STATEWAVE_BASE_URL</td><td>http://localhost:8100</td><td>Statewave server URL</td></tr>
+        <tr><td>STATEWAVE_API_KEY</td><td>(empty)</td><td>API key — optional for self-hosted</td></tr>
+        <tr><td>STATEWAVE_MAX_TOKENS</td><td>800</td><td>Max context tokens per request</td></tr>
+        <tr><td>OPENAI_API_KEY</td><td>(required)</td><td>Your OpenAI key</td></tr>
+        <tr><td>OPENAI_MODEL</td><td>gpt-4o-mini</td><td>Model used by the wrapper</td></tr>
+      </table>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /page -->
+
+<footer>
+  Built with <a href="https://statewave.ai" target="_blank">Statewave</a> ·
+  <a href="/demo">See it live →</a>
+</footer>
+
+<script>
+  // ── copy buttons ──────────────────────────────────────────────────────────
+  function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function copyBlock(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    copyText(pre.innerText, btn);
+  }
+
+  // ── active nav on scroll ──────────────────────────────────────────────────
+  const sections = document.querySelectorAll('.section[id]');
+  const navLinks = document.querySelectorAll('.sidenav a');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const active = document.querySelector(`.sidenav a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

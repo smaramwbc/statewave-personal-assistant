@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statewave · Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d12;
+      --surface: #16161f;
+      --surface2: #1e1e2a;
+      --border: #2a2a3a;
+      --accent: #7c6af7;
+      --accent-dim: rgba(124,106,247,0.13);
+      --good: #34d399;
+      --good-dim: rgba(52,211,153,0.10);
+      --text: #e8e8f0;
+      --text-muted: #8888a8;
+      --text-dim: #444460;
+      --radius: 12px;
+      --sans: 'Inter', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── header ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .logo { font-size: 15px; font-weight: 700; letter-spacing: -.3px; }
+    .logo span { color: var(--accent); }
+    .badge {
+      font-size: 11px; font-weight: 600; padding: 2px 8px;
+      border-radius: 99px; background: var(--accent-dim); color: var(--accent);
+    }
+    .spacer { flex: 1; }
+    .header-links { display: flex; gap: 6px; }
+    .header-links a {
+      font-size: 12px; color: var(--text-muted); text-decoration: none;
+      padding: 5px 10px; border-radius: 7px; border: 1px solid var(--border);
+      transition: all .15s;
+    }
+    .header-links a:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); }
+    .header-links a.active { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); }
+
+    select {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); font-size: 13px; font-family: var(--sans);
+      padding: 5px 10px; border-radius: 8px; cursor: pointer; outline: none;
+    }
+    select:focus { border-color: var(--accent); }
+
+    /* ── layout ── */
+    .layout {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ── chat pane ── */
+    .chat-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      border-right: 1px solid var(--border);
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+    }
+    .messages::-webkit-scrollbar { width: 4px; }
+    .messages::-webkit-scrollbar-track { background: transparent; }
+    .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* welcome */
+    .welcome {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 16px; padding: 40px 20px;
+      text-align: center; flex: 1;
+    }
+    .welcome h2 { font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
+    .welcome p { font-size: 14px; color: var(--text-muted); max-width: 340px; line-height: 1.6; }
+    .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px; }
+    .chip {
+      font-size: 12px; padding: 6px 12px; border-radius: 99px;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--text-muted); cursor: pointer; transition: all .15s;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+    /* messages */
+    .msg { display: flex; flex-direction: column; gap: 4px; animation: msgIn .2s ease; }
+    @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .msg-user { align-items: flex-end; }
+    .msg-assistant { align-items: flex-start; }
+
+    .bubble {
+      max-width: 78%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .msg-user .bubble {
+      background: var(--accent);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .msg-assistant .bubble {
+      background: var(--surface2);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .msg-meta {
+      font-size: 11px;
+      color: var(--text-dim);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 0 4px;
+    }
+    .meta-tag {
+      padding: 1px 6px;
+      border-radius: 5px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .meta-tag.memory { background: var(--good-dim); color: var(--good); }
+    .meta-tag.tokens { background: var(--accent-dim); color: var(--accent); }
+
+    /* typing indicator */
+    .typing .bubble {
+      display: flex; gap: 4px; align-items: center;
+      padding: 12px 16px;
+    }
+    .dot-pulse {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--text-muted);
+      animation: pulse 1.2s infinite;
+    }
+    .dot-pulse:nth-child(2) { animation-delay: .2s; }
+    .dot-pulse:nth-child(3) { animation-delay: .4s; }
+    @keyframes pulse {
+      0%, 100% { opacity: .3; transform: scale(.8); }
+      50%       { opacity: 1;  transform: scale(1); }
+    }
+
+    /* input */
+    .input-row {
+      display: flex;
+      gap: 8px;
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .input-row textarea {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      padding: 10px 14px;
+      resize: none;
+      outline: none;
+      line-height: 1.5;
+      min-height: 42px;
+      max-height: 120px;
+      overflow-y: auto;
+      transition: border-color .15s;
+    }
+    .input-row textarea:focus { border-color: var(--accent); }
+    .input-row textarea::placeholder { color: var(--text-dim); }
+    .send-btn {
+      padding: 10px 18px;
+      background: var(--accent);
+      color: #fff; font-size: 14px; font-weight: 600;
+      font-family: var(--sans); border: none; border-radius: 10px;
+      cursor: pointer; transition: opacity .15s, transform .1s;
+      align-self: flex-end; white-space: nowrap;
+    }
+    .send-btn:hover:not(:disabled) { opacity: .85; }
+    .send-btn:active:not(:disabled) { transform: scale(.96); }
+    .send-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ── memory sidebar ── */
+    .memory-pane {
+      width: 300px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .memory-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .memory-header h3 {
+      font-size: 12px; font-weight: 700; letter-spacing: .5px;
+      text-transform: uppercase; color: var(--text-muted);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .memory-count {
+      font-size: 11px; padding: 1px 7px; border-radius: 99px;
+      background: var(--accent-dim); color: var(--accent); font-weight: 600;
+    }
+    .memory-desc {
+      font-size: 12px; color: var(--text-dim); margin-top: 6px; line-height: 1.5;
+    }
+
+    .memory-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .memory-list::-webkit-scrollbar { width: 3px; }
+    .memory-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .memory-empty {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 10px; padding: 32px 16px; text-align: center;
+    }
+    .memory-empty p { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+    .memory-empty code {
+      font-family: var(--mono); font-size: 11px;
+      background: var(--surface2); padding: 2px 6px; border-radius: 4px;
+      color: var(--accent);
+    }
+
+    .fact-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 10px 12px;
+      transition: border-color .15s;
+    }
+    .fact-card.active {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .fact-card.active .fact-kind { color: var(--accent); }
+
+    .fact-kind {
+      font-size: 10px; font-weight: 700; letter-spacing: .5px;
+      text-transform: uppercase; color: var(--text-dim); margin-bottom: 5px;
+    }
+    .fact-content {
+      font-size: 12px; color: var(--text); line-height: 1.5;
+    }
+    .fact-score {
+      margin-top: 7px;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--border);
+      overflow: hidden;
+    }
+    .fact-score-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--accent);
+      transition: width .4s ease;
+    }
+
+    /* last used pulse */
+    @keyframes usedFlash {
+      0%   { border-color: var(--good); background: var(--good-dim); }
+      100% { border-color: var(--border); background: var(--surface2); }
+    }
+    .fact-card.just-used {
+      animation: usedFlash 1.8s ease forwards;
+    }
+
+    /* error */
+    .error-bubble {
+      font-size: 13px; color: #f97066;
+      background: rgba(249,112,102,.1);
+      border: 1px solid rgba(249,112,102,.2);
+      border-radius: 8px; padding: 10px 14px;
+      max-width: 78%;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">state<span>wave</span></div>
+  <div class="badge">DEMO</div>
+  <div class="spacer"></div>
+  <select id="userSelect">
+    <option value="user_3">Aiko Tanaka · ML engineer</option>
+    <option value="user_1">Priya Nair · Backend engineer</option>
+    <option value="user_2">Marcus Webb · Startup founder</option>
+  </select>
+  <div class="header-links">
+    <a href="/" >Assistant</a>
+    <a href="/demo" class="active">Demo</a>
+    <a href="/integrate">Integrate</a>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- chat -->
+  <div class="chat-pane">
+    <div class="messages" id="messages">
+      <div class="welcome" id="welcome">
+        <h2>Memory-aware assistant</h2>
+        <p>Every response is grounded in what Statewave knows about this user — facts, preferences, open issues — retrieved and ranked in real time.</p>
+        <div class="chips" id="chips">
+          <button class="chip" data-msg="What was I debugging last week?">What was I debugging last week?</button>
+          <button class="chip" data-msg="What stack am I using in my current project?">What stack am I using?</button>
+          <button class="chip" data-msg="Pick up where we left off.">Pick up where we left off</button>
+          <button class="chip" data-msg="Remind me of my open tickets.">Open tickets</button>
+          <button class="chip" data-msg="What plan am I on?">What plan am I on?</button>
+          <button class="chip" data-msg="Give me a code example in my preferred language.">Code example in my language</button>
+        </div>
+      </div>
+    </div>
+    <div class="input-row">
+      <textarea id="msgInput" rows="1" placeholder="Ask something…"></textarea>
+      <button class="send-btn" id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <!-- memory sidebar -->
+  <div class="memory-pane">
+    <div class="memory-header">
+      <h3>
+        Memory
+        <span class="memory-count" id="memCount">0</span>
+      </h3>
+      <div class="memory-desc" id="memDesc">Compiled facts Statewave knows about this user</div>
+    </div>
+    <div class="memory-list" id="memoryList">
+      <div class="memory-empty" id="memEmpty">
+        <p>No compiled memories yet.<br>Run <code>python -m scripts.seed</code> then select a user.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const userSelect  = document.getElementById('userSelect');
+  const msgInput    = document.getElementById('msgInput');
+  const sendBtn     = document.getElementById('sendBtn');
+  const messagesEl  = document.getElementById('messages');
+  const welcome     = document.getElementById('welcome');
+  const memoryList  = document.getElementById('memoryList');
+  const memCount    = document.getElementById('memCount');
+  const memEmpty    = document.getElementById('memEmpty');
+  const memDesc     = document.getElementById('memDesc');
+
+  let allFacts = [];   // full memory state
+  let lastFactIds = []; // ids used in last turn
+
+  // ── init ──────────────────────────────────────────────────────────────────
+  userSelect.addEventListener('change', () => {
+    loadMemory();
+    clearChat();
+  });
+  loadMemory();
+
+  // ── textarea auto-grow ────────────────────────────────────────────────────
+  msgInput.addEventListener('input', () => {
+    msgInput.style.height = 'auto';
+    msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + 'px';
+  });
+
+  // ── chips ─────────────────────────────────────────────────────────────────
+  document.getElementById('chips').addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    msgInput.value = chip.dataset.msg;
+    msgInput.dispatchEvent(new Event('input'));
+    send();
+  });
+
+  // ── keyboard ──────────────────────────────────────────────────────────────
+  msgInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+  sendBtn.addEventListener('click', send);
+
+  // ── memory loader ─────────────────────────────────────────────────────────
+  async function loadMemory() {
+    const userId = userSelect.value;
+    try {
+      const res = await fetch(`/api/v1/memory/${userId}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      allFacts = (data.entries || []).sort((a, b) => (b.score || 0) - (a.score || 0));
+      renderMemory(allFacts, []);
+    } catch (_) {}
+  }
+
+  function renderMemory(facts, highlightIds) {
+    memCount.textContent = facts.length;
+    if (facts.length === 0) {
+      memEmpty.style.display = 'flex';
+      // remove all non-empty cards
+      [...memoryList.querySelectorAll('.fact-card')].forEach(el => el.remove());
+      return;
+    }
+    memEmpty.style.display = 'none';
+    memoryList.innerHTML = '';
+    facts.forEach(fact => {
+      const card = document.createElement('div');
+      const isHighlighted = highlightIds.includes(fact.id);
+      card.className = 'fact-card' + (isHighlighted ? ' just-used' : '');
+      card.dataset.id = fact.id;
+      const score = Math.round((fact.score || 0) * 100);
+      card.innerHTML = `
+        <div class="fact-kind">${esc(fact.kind || 'fact')}</div>
+        <div class="fact-content">${esc(fact.content || '')}</div>
+        <div class="fact-score"><div class="fact-score-fill" style="width:${score}%"></div></div>
+      `;
+      memoryList.appendChild(card);
+    });
+  }
+
+  // ── chat helpers ──────────────────────────────────────────────────────────
+  function clearChat() {
+    messagesEl.innerHTML = '';
+    messagesEl.appendChild(welcome);
+    welcome.style.display = 'flex';
+  }
+
+  function esc(str) {
+    return String(str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function appendUserMsg(text) {
+    welcome.style.display = 'none';
+    const el = document.createElement('div');
+    el.className = 'msg msg-user';
+    el.innerHTML = `<div class="bubble">${esc(text)}</div>`;
+    messagesEl.appendChild(el);
+    scrollBottom();
+    return el;
+  }
+
+  function appendTyping() {
+    const el = document.createElement('div');
+    el.className = 'msg msg-assistant typing';
+    el.innerHTML = `<div class="bubble">
+      <span class="dot-pulse"></span>
+      <span class="dot-pulse"></span>
+      <span class="dot-pulse"></span>
+    </div>`;
+    messagesEl.appendChild(el);
+    scrollBottom();
+    return el;
+  }
+
+  function replaceTyping(typingEl, text, tokenEstimate, memoryFacts) {
+    const metaParts = [];
+    if (memoryFacts > 0) metaParts.push(`<span class="meta-tag memory">${memoryFacts} facts used</span>`);
+    if (tokenEstimate > 0) metaParts.push(`<span class="meta-tag tokens">${tokenEstimate} tokens</span>`);
+
+    typingEl.className = 'msg msg-assistant';
+    typingEl.innerHTML = `
+      <div class="bubble">${esc(text)}</div>
+      ${metaParts.length ? `<div class="msg-meta">${metaParts.join('')}</div>` : ''}
+    `;
+    scrollBottom();
+  }
+
+  function appendError(message) {
+    const el = document.createElement('div');
+    el.className = 'msg msg-assistant';
+    el.innerHTML = `<div class="error-bubble">${esc(message)}</div>`;
+    messagesEl.appendChild(el);
+    scrollBottom();
+  }
+
+  function scrollBottom() {
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  // ── send ──────────────────────────────────────────────────────────────────
+  async function send() {
+    const message = msgInput.value.trim();
+    if (!message || sendBtn.disabled) return;
+
+    const userId = userSelect.value;
+    sendBtn.disabled = true;
+    msgInput.disabled = true;
+    msgInput.value = '';
+    msgInput.style.height = 'auto';
+
+    appendUserMsg(message);
+    const typingEl = appendTyping();
+
+    try {
+      const res = await fetch('/api/v1/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, message }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(err.detail || 'Request failed');
+      }
+
+      const data = await res.json();
+      replaceTyping(typingEl, data.response, data.token_estimate, 0);
+
+      // Reload memory to reflect any new episode, then highlight used facts
+      await loadMemory();
+
+      // Best-effort: highlight top-scored facts as "used" since Statewave
+      // doesn't return which fact IDs were in the bundle from this endpoint.
+      // Re-fetch context to get the fact ids.
+      try {
+        const ctxRes = await fetch('/api/v1/memory/' + userId);
+        if (ctxRes.ok) {
+          const ctxData = await ctxRes.json();
+          const topIds = (ctxData.entries || [])
+            .sort((a, b) => (b.score || 0) - (a.score || 0))
+            .slice(0, data.token_estimate > 0 ? 5 : 0)
+            .map(e => e.id);
+          renderMemory(allFacts, topIds);
+        }
+      } catch (_) {}
+
+    } catch (err) {
+      typingEl.remove();
+      appendError(err.message);
+    } finally {
+      sendBtn.disabled = false;
+      msgInput.disabled = false;
+      msgInput.focus();
+    }
+  }
+</script>
+</body>
+</html>
