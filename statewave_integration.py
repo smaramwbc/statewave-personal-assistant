@@ -202,10 +202,12 @@ try:
                     try:
                         resp_data: dict[str, Any] = _json.loads(response.body)
                         assistant_reply: str = resp_data.get("response", "")
-                        if getattr(request.state, "memory_user_id", None) and assistant_reply:
+                        user_id = getattr(request.state, "memory_user_id", None)
+                        message = getattr(request.state, "memory_message", None)
+                        if user_id and message and assistant_reply:
                             await _record_episode(
-                                request.state.memory_user_id,
-                                request.state.memory_message,
+                                user_id,
+                                message,
                                 assistant_reply,
                             )
                     except Exception:
@@ -219,10 +221,12 @@ try:
                 try:
                     resp_data = _json.loads(resp_body)
                     assistant_reply = resp_data.get("response", "")
-                    if getattr(request.state, "memory_user_id", None) and assistant_reply:
+                    user_id = getattr(request.state, "memory_user_id", None)
+                    message = getattr(request.state, "memory_message", None)
+                    if user_id and message and assistant_reply:
                         await _record_episode(
-                            request.state.memory_user_id,
-                            request.state.memory_message,
+                            user_id,
+                            message,
                             assistant_reply,
                         )
                 except Exception:
