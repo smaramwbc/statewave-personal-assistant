@@ -46,3 +46,36 @@ async def test_middleware_returns_original_response_when_body_is_available(
     assert returned is response
     assert returned.headers["set-cookie"].startswith("session=abc")
     assert recorded == [("user_1", "Hello", "Hi!")]
+
+
+@pytest.mark.asyncio
+async def test_middleware_skips_recording_when_memory_message_is_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    recorded: list[tuple[str, str, str]] = []
+
+    async def fake_record_episode(user_id: str, message: str, reply: str) -> None:
+        recorded.append((user_id, message, reply))
+
+    async def body() -> bytes:
+        return b"{}"
+
+    monkeypatch.setattr(statewave_integration, "_record_episode", fake_record_episode)
+
+    request = SimpleNamespace(
+        method="POST",
+        url=SimpleNamespace(path="/chat"),
+        state=SimpleNamespace(memory_user_id="user_1"),
+        body=body,
+    )
+    response = JSONResponse({"response": "Hi!"})
+
+    async def call_next(_: Any) -> JSONResponse:
+        return response
+
+    middleware = statewave_integration.StatewaveMemoryMiddleware(app=lambda *_: None)
+
+    returned = await middleware.dispatch(request, call_next)
+
+    assert returned is response
+    assert recorded == []
