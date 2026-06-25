@@ -4,9 +4,9 @@ This is the primary demo moment. Run it and the terminal output diff is
 immediately obvious.
 
 Usage:
-    python -m scripts.compare --user user_3 --message "What was the issue we were debugging last week?"
-    python -m scripts.compare --user user_1 --budget-demo
-    python -m scripts.compare --interactive
+    python -m scripts.compare compare --user dev_alice --message "What was the issue we were debugging last week?"
+    python -m scripts.compare budget --user dev_bob
+    python -m scripts.compare chat --user dev_alice
 """
 
 import asyncio
@@ -53,7 +53,7 @@ async def _memory_response(
 ) -> tuple[str, int, int]:
     """Call the LLM with Statewave context injected. Returns (reply, token_estimate, n_memories)."""
     try:
-        bundle = await sw.get_context(user_id)
+        bundle = await sw.get_context(user_id, task=message)
     except StatewaveError as exc:
         console.print(f"[red]Statewave error:[/] {exc}")
         raise typer.Exit(1) from exc
@@ -169,10 +169,10 @@ async def _run_memory_inspect(user_id: str) -> None:
     for entry in state.entries:
         confidence_color = "green" if entry.confidence >= 0.95 else "yellow"
         header = Text()
-        header.append(f"[{entry.type}]  ", style="bold magenta")
+        header.append(f"[{entry.kind}]  ", style="bold magenta")
         header.append(f"confidence={entry.confidence:.2f}", style=confidence_color)
-        if entry.source_episode_id:
-            header.append(f"  source={entry.source_episode_id}", style="dim")
+        if entry.source_episode_ids:
+            header.append(f"  source={entry.source_episode_ids[0]}", style="dim")
         if entry.tags:
             header.append(f"  tags={entry.tags}", style="dim cyan")
 
@@ -197,7 +197,7 @@ async def _run_interactive(user_id: str) -> None:
             if not message or message.lower() in {"quit", "exit", "q"}:
                 break
 
-            bundle = await sw.get_context(user_id)
+            bundle = await sw.get_context(user_id, task=message)
             reply = await llm.chat(message, bundle.assembled_context)
 
             # Record the turn

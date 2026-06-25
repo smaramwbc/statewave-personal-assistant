@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "statewave-memory-quickstart"
+name = "statewave-personal-assistant"
 version = "0.1.0"
 description = "Quickstart: add persistent cross-session memory to any Python chat app with Statewave + FastAPI"
 readme = "README.md"

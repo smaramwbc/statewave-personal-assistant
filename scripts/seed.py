@@ -11,10 +11,9 @@ Statewave extracts structured memory facts from the episode payloads automatical
 
 import asyncio
 import logging
-import sys
+from typing import Any
 
 from rich.console import Console
-from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
@@ -26,7 +25,7 @@ console = Console()
 logger = logging.getLogger(__name__)
 
 
-async def seed_user(sw: StatewaveClient, profile: dict) -> dict:
+async def seed_user(sw: StatewaveClient, profile: dict[str, Any]) -> dict[str, Any]:
     user_id = profile["user_id"]
     results = {"user_id": user_id, "episodes": 0, "memories_compiled": 0, "errors": 0}
 

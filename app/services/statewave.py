@@ -45,7 +45,7 @@ class StatewaveClient:
 
     def __init__(self, api_key: str | None = None, base_url: str | None = None) -> None:
         self._base_url = (base_url or settings.statewave_base_url).rstrip("/")
-        self._api_key = api_key or settings.statewave_api_key
+        self._api_key = api_key if api_key is not None else settings.statewave_api_key
 
         headers: dict[str, str] = {"Content-Type": "application/json"}
         if self._api_key:
@@ -154,14 +154,22 @@ class StatewaveClient:
         """Trigger memory compilation for a subject.
 
         Statewave processes uncompiled episodes and extracts structured memory facts.
+        Loops until the server's has_more flag is False to handle large episode sets.
         Call this after seeding episodes; in live use the server can auto-compile.
         """
-        data = await self._post("/v1/memories/compile", {"subject_id": subject_id})
-        memories = [MemoryEntry(**m) for m in data.get("memories", [])]
+        all_memories: list[MemoryEntry] = []
+        total_created = 0
+        while True:
+            data = await self._post("/v1/memories/compile", {"subject_id": subject_id})
+            batch = [MemoryEntry(**m) for m in data.get("memories", [])]
+            all_memories.extend(batch)
+            total_created += data.get("memories_created", len(batch))
+            if not data.get("has_more", False):
+                break
         return CompileResult(
-            subject_id=data.get("subject_id", subject_id),
-            memories_created=data.get("memories_created", len(memories)),
-            memories=memories,
+            subject_id=subject_id,
+            memories_created=total_created,
+            memories=all_memories,
         )
 
     async def get_context(

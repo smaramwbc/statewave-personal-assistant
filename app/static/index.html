@@ -185,8 +185,8 @@
       font-family: var(--mono); font-weight: 600; flex-shrink: 0; margin-top: 1px;
     }
     .kind-profile_fact { background: #1a2a3a; color: #60a5fa; }
-    .kind-preference { background: #1a3a2a; color: var(--green); }
-    .kind-open_issue { background: #3a1a1a; color: #f87171; }
+    .kind-procedure { background: #1a3a2a; color: var(--green); }
+    .kind-artifact_ref { background: #3a1a1a; color: #f87171; }
     .kind-episode_summary { background: #2a2a3a; color: #a78bfa; }
     .kind-default { background: #252525; color: var(--text-mid); }
 
@@ -535,8 +535,8 @@
     for (const [kind, entries] of Object.entries(byKind)) {
       entriesHtml += `<div class="mem-section-title">${escHtml(kind.replace(/_/g, ' '))}</div>`;
       for (const e of entries) {
-        const score = Math.min(1, Math.max(0, e.score || 0));
-        const scorePct = (score * 100).toFixed(0);
+        const conf = Math.min(1, Math.max(0, e.confidence || 0));
+        const confPct = (conf * 100).toFixed(0);
         const kindClass = `kind-${e.kind}` in {} ? `kind-${e.kind}` : 'kind-default';
         entriesHtml += `
           <div class="mem-entry">
@@ -544,11 +544,11 @@
               <span class="mem-kind ${kindClass}">${escHtml(e.kind)}</span>
               <span class="mem-content">${escHtml(e.content)}</span>
             </div>
-            <div class="score-bar"><div class="score-fill" style="width:${scorePct}%"></div></div>
+            <div class="score-bar"><div class="score-fill" style="width:${confPct}%"></div></div>
             <div class="mem-footer">
-              <span>score ${score.toFixed(2)}</span>
-              ${e.source_episode_id ? `<span>${escHtml(e.source_episode_id)}</span>` : ''}
-              ${e.tags && e.tags.length ? `<span>${e.tags.map(t => '#' + t).join(' ')}</span>` : ''}
+              <span>confidence ${conf.toFixed(2)}</span>
+              ${e.source_episode_ids && e.source_episode_ids.length ? `<span>${e.source_episode_ids.map(id => escHtml(id)).join(', ')}</span>` : ''}
+              ${e.tags && e.tags.length ? `<span>${e.tags.map(t => escHtml('#' + t)).join(' ')}</span>` : ''}
             </div>
           </div>`;
       }

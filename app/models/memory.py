@@ -10,10 +10,10 @@ class MemoryEntry(BaseModel):
 
     id: str
     subject_id: str
-    kind: str  # profile_fact, preference, open_issue, episode_summary, procedure, etc.
+    kind: str  # profile_fact, episode_summary, procedure, artifact_ref
     content: str
-    score: float = Field(ge=0.0)
-    source_episode_id: str | None = None
+    confidence: float = Field(default=1.0, ge=0.0)
+    source_episode_ids: list[str] = Field(default_factory=list)
     created_at: str
     tags: list[str] = Field(default_factory=list)
 
@@ -51,6 +51,8 @@ class CompileResult(BaseModel):
     subject_id: str
     memories_created: int
     memories: list[MemoryEntry] = Field(default_factory=list)
+    has_more: bool = False
+    remaining_episodes: int = 0
 
 
 class UserMemoryState(BaseModel):

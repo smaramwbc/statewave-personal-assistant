@@ -17,8 +17,8 @@ CONTEXT_PAYLOAD = {
             "subject_id": "user_1",
             "kind": "profile_fact",
             "content": "Senior engineer, enterprise plan.",
-            "score": 0.98,
-            "source_episode_id": "ep_001",
+            "confidence": 0.98,
+            "source_episode_ids": ["ep_001"],
             "created_at": "2024-06-01T10:00:00Z",
             "tags": ["role"],
         }
@@ -49,8 +49,8 @@ COMPILE_PAYLOAD = {
             "subject_id": "user_1",
             "kind": "profile_fact",
             "content": "Senior engineer.",
-            "score": 1.0,
-            "source_episode_id": "ep_001",
+            "confidence": 1.0,
+            "source_episode_ids": ["ep_001"],
             "created_at": "2024-06-01T10:00:00Z",
             "tags": [],
         }
@@ -64,8 +64,8 @@ MEMORY_SEARCH_PAYLOAD = {
             "subject_id": "user_1",
             "kind": "profile_fact",
             "content": "Senior engineer.",
-            "score": 1.0,
-            "source_episode_id": "ep_001",
+            "confidence": 1.0,
+            "source_episode_ids": ["ep_001"],
             "created_at": "2024-06-01T10:00:00Z",
             "tags": [],
         }

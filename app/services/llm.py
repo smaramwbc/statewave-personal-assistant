@@ -53,7 +53,7 @@ def _count_tokens(model: str, messages: list[dict[str, str]]) -> int:
 
 class LLMService:
     def __init__(self) -> None:
-        self._client = AsyncOpenAI(api_key=settings.llm_api_key)
+        self._client: AsyncOpenAI | None = None
         self._model = settings.openai_model
 
     async def chat(self, user_message: str, assembled_context: str = "") -> str:
@@ -62,6 +62,8 @@ class LLMService:
         Counts tokens before sending. If the prompt would exceed the model's context
         window, assembled_context is stripped and the base prompt is used instead.
         """
+        if self._client is None:
+            self._client = AsyncOpenAI(api_key=settings.llm_api_key)
         system = _build_system_prompt(assembled_context)
         messages: list[dict[str, str]] = [
             {"role": "system", "content": system},

@@ -13,7 +13,7 @@ def _memory_entry(**kwargs) -> dict:
         "subject_id": "user_1",
         "kind": "profile_fact",
         "content": "Senior engineer.",
-        "score": 0.98,
+        "confidence": 0.98,
         "created_at": "2024-06-01T00:00:00Z",
     }
     base.update(kwargs)
@@ -23,13 +23,13 @@ def _memory_entry(**kwargs) -> dict:
 def test_memory_entry_valid() -> None:
     entry = MemoryEntry(**_memory_entry())
     assert entry.kind == "profile_fact"
-    assert entry.score == 0.98
+    assert entry.confidence == 0.98
     assert entry.tags == []
 
 
-def test_memory_entry_score_non_negative() -> None:
+def test_memory_entry_confidence_non_negative() -> None:
     with pytest.raises(ValidationError):
-        MemoryEntry(**_memory_entry(score=-0.1))
+        MemoryEntry(**_memory_entry(confidence=-0.1))
 
 
 def test_context_bundle_defaults() -> None:
@@ -49,16 +49,16 @@ def test_context_bundle_memories_alias() -> None:
 def test_user_memory_state_by_type() -> None:
     entries = [
         MemoryEntry(**_memory_entry(id="m1", kind="profile_fact")),
-        MemoryEntry(**_memory_entry(id="m2", kind="preference")),
-        MemoryEntry(**_memory_entry(id="m3", kind="preference")),
+        MemoryEntry(**_memory_entry(id="m2", kind="procedure")),
+        MemoryEntry(**_memory_entry(id="m3", kind="procedure")),
     ]
     state = UserMemoryState(
         user_id="user_1",
         total_memories=3,
-        memories_by_type={"profile_fact": 1, "preference": 2},
+        memories_by_type={"profile_fact": 1, "procedure": 2},
         entries=entries,
     )
-    assert state.memories_by_type["preference"] == 2
+    assert state.memories_by_type["procedure"] == 2
 
 
 def test_chat_request_empty_message_rejected() -> None:

@@ -21,8 +21,8 @@ def _mock_entry(id: str = "mem_001") -> MemoryEntry:
         subject_id="user_1",
         kind="profile_fact",
         content="Senior engineer.",
-        score=0.98,
-        source_episode_id="ep_001",
+        confidence=0.98,
+        source_episode_ids=["ep_001"],
         created_at="2024-06-01T10:00:00Z",
     )
 
@@ -51,16 +51,16 @@ def _mock_memory_state() -> UserMemoryState:
     return UserMemoryState(
         user_id="user_1",
         total_memories=2,
-        memories_by_type={"profile_fact": 1, "preference": 1},
+        memories_by_type={"profile_fact": 1, "episode_summary": 1},
         entries=[
             _mock_entry("mem_001"),
             MemoryEntry(
                 id="mem_002",
                 subject_id="user_1",
-                kind="preference",
+                kind="episode_summary",
                 content="Prefers Python.",
-                score=0.95,
-                source_episode_id="ep_001",
+                confidence=0.95,
+                source_episode_ids=["ep_001"],
                 created_at="2024-06-01T10:00:00Z",
             ),
         ],
