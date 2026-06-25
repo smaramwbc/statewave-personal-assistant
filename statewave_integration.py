@@ -190,17 +190,28 @@ try:
 
                 response = await call_next(request)
 
-                if hasattr(response, "body"):
-                    resp_body = response.body
-                else:
-                    resp_body = b""
-                    async for chunk in response.body_iterator:  # type: ignore[attr-defined]
-                        resp_body += chunk
-
                 # Record episode after response (best-effort; never swallows the body).
+                if hasattr(response, "body"):
+                    try:
+                        resp_data: dict[str, Any] = _json.loads(response.body)
+                        assistant_reply: str = resp_data.get("response", "")
+                        if getattr(request.state, "memory_user_id", None) and assistant_reply:
+                            await _record_episode(
+                                request.state.memory_user_id,
+                                request.state.memory_message,
+                                assistant_reply,
+                            )
+                    except Exception:
+                        pass
+                    return response
+
+                resp_body = b""
+                async for chunk in response.body_iterator:  # type: ignore[attr-defined]
+                    resp_body += chunk
+
                 try:
-                    resp_data: dict[str, Any] = _json.loads(resp_body)
-                    assistant_reply: str = resp_data.get("response", "")
+                    resp_data = _json.loads(resp_body)
+                    assistant_reply = resp_data.get("response", "")
                     if getattr(request.state, "memory_user_id", None) and assistant_reply:
                         await _record_episode(
                             request.state.memory_user_id,
