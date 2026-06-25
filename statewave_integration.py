@@ -22,8 +22,9 @@ Environment variables:
 
 from __future__ import annotations
 
-import os
+import json as _json
 import logging
+import os
 from typing import Any
 
 import httpx
@@ -162,8 +163,8 @@ async def memory_chat(
 try:
     from fastapi import Request, Response
     from starlette.middleware.base import BaseHTTPMiddleware
+    from starlette.responses import Response as StarletteResponse
     from starlette.types import ASGIApp
-    import json as _json
 
     class StatewaveMemoryMiddleware(BaseHTTPMiddleware):
         """Injects Statewave memory context into POST /chat requests."""
@@ -189,11 +190,14 @@ try:
 
                 response = await call_next(request)
 
-                # Record episode after response (best-effort).
+                # Drain the body iterator — must always rebuild the response so the
+                # client receives a non-empty body even if episode recording fails.
+                resp_body = b""
+                async for chunk in response.body_iterator:  # type: ignore[attr-defined]
+                    resp_body += chunk
+
+                # Record episode after response (best-effort; never swallows the body).
                 try:
-                    resp_body = b""
-                    async for chunk in response.body_iterator:  # type: ignore[attr-defined]
-                        resp_body += chunk
                     resp_data: dict[str, Any] = _json.loads(resp_body)
                     assistant_reply: str = resp_data.get("response", "")
                     if getattr(request.state, "memory_user_id", None) and assistant_reply:
@@ -202,17 +206,15 @@ try:
                             request.state.memory_message,
                             assistant_reply,
                         )
-                    from starlette.responses import Response as StarletteResponse
-                    return StarletteResponse(
-                        content=resp_body,
-                        status_code=response.status_code,
-                        headers=dict(response.headers),
-                        media_type=response.media_type,
-                    )
                 except Exception:
                     pass
 
-                return response
+                return StarletteResponse(
+                    content=resp_body,
+                    status_code=response.status_code,
+                    headers=dict(response.headers),
+                    media_type=response.media_type,
+                )
 
             return await call_next(request)
 

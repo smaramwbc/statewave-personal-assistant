@@ -30,10 +30,10 @@ ruff check .
 mypy app scripts
 
 # Demo CLI
-python -m scripts.compare compare --user user_3 --message "your message"
-python -m scripts.compare inspect --user user_3
-python -m scripts.compare budget --user user_1
-python -m scripts.compare chat --user user_3
+python -m scripts.compare compare --user dev_alice --message "your message"
+python -m scripts.compare inspect --user dev_alice
+python -m scripts.compare budget --user dev_bob
+python -m scripts.compare chat --user dev_alice
 ```
 
 ## Architecture
@@ -54,11 +54,11 @@ POST /api/v1/chat
 
 - **`app/services/statewave.py`** — async httpx client wrapping four Statewave endpoints: `record_episode`, `compile_memories`, `get_context`, `list_memories`. The `get_context` call returns a `ContextBundle` with pre-assembled text and a token estimate, ready for direct injection into the LLM system prompt.
 - **`app/services/llm.py`** — thin AsyncOpenAI wrapper. Builds the system prompt by appending the Statewave `assembled_context` string. No memory logic lives here.
-- **`app/api/routes.py`** — two endpoints: `POST /api/v1/chat` (the main flow above) and `GET /api/v1/memory/{user_id}` (inspect compiled memory state). Both services are injected via FastAPI `Depends()`.
+- **`app/api/routes.py`** — three endpoints: `POST /api/v1/chat` (the main flow above), `GET /api/v1/memory/{user_id}` (inspect compiled memory state), and `POST /api/v1/compare` (side-by-side stateless vs memory-backed). All services are injected via FastAPI `Depends()`.
 
 ### Demo data
 
-`app/data/profiles.py` contains three pre-seeded users (`user_1` Priya Nair, `user_2` Marcus Webb, `user_3` Aiko Tanaka) with fabricated episode histories. `scripts/seed.py` ingests these into Statewave. `user_3` is the primary demo user (3 sessions), `user_1` is used for token budget demos (14 sessions).
+`app/data/profiles.py` contains two pre-seeded users (`dev_alice` Alice Chen and `dev_bob` Bob Martinez) with fabricated episode histories. `scripts/seed.py` ingests these into Statewave. `dev_alice` is the primary demo user (4 sessions), `dev_bob` is used for token budget demos (6 sessions).
 
 ### Configuration
 

@@ -3,9 +3,9 @@
 import logging
 import sys
 import uuid
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import AsyncIterator, Awaitable, Callable
 
 import httpx
 from fastapi import FastAPI, Request, Response
@@ -73,9 +73,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(
-    title="Statewave Memory Quickstart",
+    title="Statewave Personal Assistant",
     description=(
-        "Quickstart showing persistent cross-session memory with Statewave + FastAPI. "
+        "Personal assistant with persistent cross-session memory powered by Statewave + FastAPI. "
         "Demonstrates ranked, token-bounded memory retrieval as a drop-in replacement for "
         "naive chat-history injection."
     ),

@@ -1,4 +1,4 @@
-![personal assistant memory](docs/images/personal-assistant-banner.png)
+ommit msg ![personal assistant memory](docs/images/personal-assistant-banner.png)
 
 # statewave-personal-assistant
 
@@ -32,7 +32,7 @@ This is not a model limitation. It is an architecture problem.
 
 **Statewave** is an open-source, self-hosted memory runtime for AI agents. Instead of passing raw conversation history to the LLM, you pass conversations through Statewave, which:
 
-1. **Extracts structured facts** from each conversation turn (user role, preferences, open issues, session summaries)
+1. **Extracts structured facts** from each conversation turn (user role, procedures, artifact references, session summaries)
 2. **Ranks those facts** by relevance and recency
 3. **Returns only the highest-signal context** that fits within your token budget, as a ready-to-inject string
 
@@ -59,9 +59,9 @@ A memory is a structured fact that Statewave extracts from one or more episodes.
 | Kind | What it stores |
 |---|---|
 | `profile_fact` | Stable facts about the user (role, language preference, timezone) |
-| `open_issue` | Unresolved problems or bugs the user is working on |
 | `episode_summary` | A compressed summary of what happened in a session |
-| `preference` | Expressed preferences about tools, patterns, or workflows |
+| `procedure` | Multi-step instructions or workflows the user follows |
+| `artifact_ref` | References to external artifacts, files, or documents |
 
 Memories are created by calling `POST /v1/memories/compile`. This is an explicit step, not automatic.
 
@@ -113,8 +113,8 @@ git --version       # should print git version ...
 ### Step 1: Clone and install this repository
 
 ```bash
-git clone https://github.com/statewave-ai/statewave-memory-quickstart.git
-cd statewave-memory-quickstart
+git clone https://github.com/Infrasity-Labs/statewave-personal-assistant.git
+cd statewave-personal-assistant
 
 # Create an isolated Python environment (recommended)
 python -m venv .venv
@@ -168,7 +168,7 @@ curl http://localhost:8100/healthz
 Go back to this repository's directory:
 
 ```bash
-cd ../statewave-memory-quickstart
+cd ../statewave-personal-assistant
 ```
 
 ### Step 4: Seed demo users
@@ -227,8 +227,8 @@ The chat interface at `http://localhost:8000` is designed to make the memory lay
 |  shows:                   |  here, grouped by kind:      |
 |  - memory / no memory     |                              |
 |  - episode ID             |  profile_fact   score: 1.00  |
-|  - token count used       |  open_issue     score: 0.94  |
-|                           |  episode_summary score: 0.87 |
+|  - token count used       |  procedure      confidence: 0.94  |
+|                           |  episode_summary confidence: 0.87 |
 +---------------------------+------------------------------+
 |  [hint chips]  What was the bug I was debugging last...  |
 +----------------------------------------------------------+
@@ -287,23 +287,23 @@ python -m scripts.compare inspect --user dev_alice
 Prints every compiled memory fact for a user. This is useful for understanding what context will be injected before a conversation starts.
 
 ```
-3 memories compiled.  profile_fact: 1  open_issue: 1  episode_summary: 1
+3 memories compiled.  profile_fact: 1  procedure: 1  episode_summary: 1
 
 +--------------------------------------------------------------------------+
-| [profile_fact]  score=1.00  source=ep_001  tags=['role', 'python']       |
+| [profile_fact]  confidence=1.00  source=ep_001  tags=['role', 'python']  |
 |                                                                          |
 | Indie developer building a RAG-based code assistant. Python only.        |
 +--------------------------------------------------------------------------+
 
 +--------------------------------------------------------------------------+
-| [open_issue]  score=0.94  source=ep_002  tags=['embeddings', '429']      |
+| [procedure]  confidence=0.94  source=ep_002  tags=['embeddings', '429']  |
 |                                                                          |
 | Intermittent 429 errors on batch embed jobs. Likely undocumented         |
 | per-IP burst limit. Workaround: tenacity retry with exponential backoff. |
 +--------------------------------------------------------------------------+
 ```
 
-`score` is Statewave's confidence in the memory fact. `source` is the episode ID that generated it. When the token budget is tight, higher-scored facts are always injected first.
+`confidence` is Statewave's confidence in the memory fact. `source` is the episode ID that generated it. When the token budget is tight, higher-confidence facts are always injected first.
 
 ### Budget: token budget enforcement
 
@@ -340,7 +340,7 @@ Opens an interactive terminal chat session backed by Statewave. Each response sh
 
 ## API Reference
 
-The application exposes three HTTP endpoints.
+The application exposes four HTTP endpoints.
 
 ### POST /api/v1/chat
 
@@ -397,11 +397,11 @@ Returns `{ "status": "ok" }`. Used by the UI health indicator in the top bar.
 ## Project Structure
 
 ```
-statewave-memory-quickstart/
+statewave-personal-assistant/
 |
 |-- app/                            Main application package
 |   |-- api/
-|   |   +-- routes.py              Two endpoints: POST /chat, GET /memory/{user_id}
+|   |   +-- routes.py              Three endpoints: POST /chat, GET /memory/{user_id}, POST /compare
 |   |-- core/
 |   |   +-- config.py              All settings loaded from .env via Pydantic
 |   |-- data/
@@ -424,7 +424,7 @@ statewave-memory-quickstart/
 |   |-- conftest.py                Shared fixtures (mock Statewave, mock OpenAI)
 |   |-- test_routes.py             Route-level integration tests
 |   |-- test_statewave_client.py   Unit tests for the Statewave client
-|   +-- test_llm_service.py        Unit tests for the LLM service
+|   +-- test_models.py             Pydantic model validation tests
 |
 |-- .env.example                   Copy this to .env and fill in your keys
 |-- pyproject.toml                 Dependencies and project metadata
@@ -501,6 +501,8 @@ Copy `.env.example` to `.env` and configure the variables below. Only `LLM_API_K
 | `STATEWAVE_API_KEY` | No | | API key for Statewave, if you have enabled authentication on your Statewave instance. Leave empty for local development. |
 | `HOST` | No | `0.0.0.0` | Address the application server binds to. |
 | `PORT` | No | `8000` | Port the application server listens on. |
+| `LOG_LEVEL` | No | `info` | Logging verbosity. One of `debug`, `info`, `warning`, `error`, `critical`. |
+| `CORS_ORIGINS` | No | `http://localhost:8000,...` | Comma-separated list of allowed CORS origins. Set this for production deployments. |
 
 ---
 

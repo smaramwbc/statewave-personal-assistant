@@ -35,5 +35,4 @@ jobs:
       - name: Run tests
         run: pytest -v --tb=short
         env:
-          OPENAI_API_KEY: sk-dummy-for-tests
-          STATEWAVE_API_KEY: sw-dummy-for-tests
+          LLM_API_KEY: sk-dummy-for-tests

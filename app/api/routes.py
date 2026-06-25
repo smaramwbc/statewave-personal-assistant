@@ -100,8 +100,8 @@ async def chat(
     summary="Inspect compiled memory state for a user",
     description=(
         "Returns all memory facts Statewave has compiled for this subject: "
-        "profile facts, preferences, open issues, and episode summaries — "
-        "each with its score, source episode ID, and timestamp."
+        "profile facts, procedures, artifact references, and episode summaries — "
+        "each with its confidence score, source episode IDs, and timestamp."
     ),
 )
 async def get_memory(
