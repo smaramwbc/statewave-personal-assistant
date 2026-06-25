@@ -39,7 +39,14 @@ STATEWAVE_API_KEY:  str = os.getenv("STATEWAVE_API_KEY", "")
 OPENAI_MODEL:       str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 MAX_MEMORY_TOKENS:  int = int(os.getenv("STATEWAVE_MAX_TOKENS", "800"))
 
-_openai = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
+_openai: AsyncOpenAI | None = None
+
+
+def _openai_client() -> AsyncOpenAI:
+    global _openai
+    if _openai is None:
+        _openai = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
+    return _openai
 
 # ── low-level Statewave helpers ───────────────────────────────────────────────
 
@@ -118,7 +125,7 @@ async def memory_chat(
         system = system_prompt
 
     # 3. Call the LLM.
-    completion = await _openai.chat.completions.create(
+    completion = await _openai_client().chat.completions.create(
         model=model,
         messages=[
             {"role": "system",  "content": system},
