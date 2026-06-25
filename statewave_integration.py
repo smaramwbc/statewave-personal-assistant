@@ -190,11 +190,12 @@ try:
 
                 response = await call_next(request)
 
-                # Drain the body iterator — must always rebuild the response so the
-                # client receives a non-empty body even if episode recording fails.
-                resp_body = b""
-                async for chunk in response.body_iterator:  # type: ignore[attr-defined]
-                    resp_body += chunk
+                if hasattr(response, "body"):
+                    resp_body = response.body
+                else:
+                    resp_body = b""
+                    async for chunk in response.body_iterator:  # type: ignore[attr-defined]
+                        resp_body += chunk
 
                 # Record episode after response (best-effort; never swallows the body).
                 try:

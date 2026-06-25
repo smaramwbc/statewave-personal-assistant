@@ -1,4 +1,4 @@
-ommit msg ![personal assistant memory](docs/images/personal-assistant-banner.png)
+![personal assistant memory](docs/images/personal-assistant-banner.png)
 
 # statewave-personal-assistant
 
@@ -56,12 +56,12 @@ Think of episodes as the raw log. Statewave reads from this log to build memorie
 
 A memory is a structured fact that Statewave extracts from one or more episodes. Memories are typed:
 
-| Kind | What it stores |
-|---|---|
-| `profile_fact` | Stable facts about the user (role, language preference, timezone) |
-| `episode_summary` | A compressed summary of what happened in a session |
-| `procedure` | Multi-step instructions or workflows the user follows |
-| `artifact_ref` | References to external artifacts, files, or documents |
+| Kind              | What it stores                                                    |
+| ----------------- | ----------------------------------------------------------------- |
+| `profile_fact`    | Stable facts about the user (role, language preference, timezone) |
+| `episode_summary` | A compressed summary of what happened in a session                |
+| `procedure`       | Multi-step instructions or workflows the user follows             |
+| `artifact_ref`    | References to external artifacts, files, or documents             |
 
 Memories are created by calling `POST /v1/memories/compile`. This is an explicit step, not automatic.
 
@@ -355,10 +355,10 @@ Send a user message and receive a memory-backed assistant response.
 }
 ```
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `user_id` | string | Yes | The subject ID. Any string. Created automatically on first use. |
-| `message` | string | Yes | The user's message. |
+| Field     | Type   | Required | Description                                                     |
+| --------- | ------ | -------- | --------------------------------------------------------------- |
+| `user_id` | string | Yes      | The subject ID. Any string. Created automatically on first use. |
+| `message` | string | Yes      | The user's message.                                             |
 
 **Response body**
 
@@ -373,11 +373,11 @@ Send a user message and receive a memory-backed assistant response.
 }
 ```
 
-| Field | Type | Description |
-|---|---|---|
-| `response` | string | The assistant's reply. |
-| `episode_id` | string | The Statewave episode ID for this turn. |
-| `context_used` | boolean | `true` if at least one memory fact was injected. |
+| Field            | Type    | Description                                      |
+| ---------------- | ------- | ------------------------------------------------ |
+| `response`       | string  | The assistant's reply.                           |
+| `episode_id`     | string  | The Statewave episode ID for this turn.          |
+| `context_used`   | boolean | `true` if at least one memory fact was injected. |
 | `token_estimate` | integer | Tokens consumed by the assembled memory context. |
 
 ### GET /api/v1/memory/{user_id}
@@ -492,17 +492,17 @@ mypy app scripts
 
 Copy `.env.example` to `.env` and configure the variables below. Only `LLM_API_KEY` is required to get started.
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `LLM_API_KEY` | Yes | | API key for your LLM provider. Works with any OpenAI-compatible API. |
-| `OPENAI_MODEL` | No | `gpt-4o-mini` | Model identifier passed to the LLM API. |
-| `STATEWAVE_BASE_URL` | No | `http://localhost:8100` | Base URL of the Statewave server. Change this for production deployments. |
-| `STATEWAVE_MAX_TOKENS` | No | `800` | Maximum tokens Statewave may use for an assembled context bundle. Lower values = fewer facts injected but less LLM cost per request. |
-| `STATEWAVE_API_KEY` | No | | API key for Statewave, if you have enabled authentication on your Statewave instance. Leave empty for local development. |
-| `HOST` | No | `0.0.0.0` | Address the application server binds to. |
-| `PORT` | No | `8000` | Port the application server listens on. |
-| `LOG_LEVEL` | No | `info` | Logging verbosity. One of `debug`, `info`, `warning`, `error`, `critical`. |
-| `CORS_ORIGINS` | No | `http://localhost:8000,...` | Comma-separated list of allowed CORS origins. Set this for production deployments. |
+| Variable               | Required | Default                     | Description                                                                                                                          |
+| ---------------------- | -------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `LLM_API_KEY`          | Yes      |                             | API key for your LLM provider. Works with any OpenAI-compatible API.                                                                 |
+| `OPENAI_MODEL`         | No       | `gpt-4o-mini`               | Model identifier passed to the LLM API.                                                                                              |
+| `STATEWAVE_BASE_URL`   | No       | `http://localhost:8100`     | Base URL of the Statewave server. Change this for production deployments.                                                            |
+| `STATEWAVE_MAX_TOKENS` | No       | `800`                       | Maximum tokens Statewave may use for an assembled context bundle. Lower values = fewer facts injected but less LLM cost per request. |
+| `STATEWAVE_API_KEY`    | No       |                             | API key for Statewave, if you have enabled authentication on your Statewave instance. Leave empty for local development.             |
+| `HOST`                 | No       | `0.0.0.0`                   | Address the application server binds to.                                                                                             |
+| `PORT`                 | No       | `8000`                      | Port the application server listens on.                                                                                              |
+| `LOG_LEVEL`            | No       | `info`                      | Logging verbosity. One of `debug`, `info`, `warning`, `error`, `critical`.                                                           |
+| `CORS_ORIGINS`         | No       | `http://localhost:8000,...` | Comma-separated list of allowed CORS origins. Set this for production deployments.                                                   |
 
 ---
 

@@ -159,13 +159,15 @@ class StatewaveClient:
         """
         all_memories: list[MemoryEntry] = []
         total_created = 0
-        while True:
+        for _ in range(100):
             data = await self._post("/v1/memories/compile", {"subject_id": subject_id})
             batch = [MemoryEntry(**m) for m in data.get("memories", [])]
             all_memories.extend(batch)
             total_created += data.get("memories_created", len(batch))
             if not data.get("has_more", False):
                 break
+        else:
+            logger.warning("Memory compilation exceeded maximum iteration limit for subject %s", subject_id)
         return CompileResult(
             subject_id=subject_id,
             memories_created=total_created,

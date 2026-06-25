@@ -537,7 +537,7 @@
       for (const e of entries) {
         const conf = Math.min(1, Math.max(0, e.confidence || 0));
         const confPct = (conf * 100).toFixed(0);
-        const kindClass = `kind-${e.kind}` in {} ? `kind-${e.kind}` : 'kind-default';
+        const kindClass = ['profile_fact', 'procedure', 'artifact_ref', 'episode_summary'].includes(e.kind) ? 'kind-' + e.kind : 'kind-default';
         entriesHtml += `
           <div class="mem-entry">
             <div class="mem-entry-top">
