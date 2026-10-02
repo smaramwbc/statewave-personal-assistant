@@ -31,7 +31,13 @@ async def test_get_context_maps_assembled_context(mock_sdk: AsyncMock) -> None:
     context = await statewave_integration._get_context("user_1", "hi", max_tokens=500)
 
     assert context == "User likes Python."
-    mock_sdk.get_context.assert_awaited_once_with("user_1", "hi", max_tokens=500)
+    mock_sdk.get_context.assert_awaited_once_with(
+        "user_1",
+        "hi",
+        max_tokens=500,
+        caller_id="personal_assistant",
+        caller_type="chat",
+    )
 
 
 @pytest.mark.asyncio
@@ -41,6 +47,13 @@ async def test_get_context_returns_empty_string_on_error(mock_sdk: AsyncMock) ->
     context = await statewave_integration._get_context("user_1", "hi")
 
     assert context == ""
+    mock_sdk.get_context.assert_awaited_once_with(
+        "user_1",
+        "hi",
+        max_tokens=statewave_integration.MAX_MEMORY_TOKENS,
+        caller_id="personal_assistant",
+        caller_type="chat",
+    )
 
 
 @pytest.mark.asyncio
