@@ -87,7 +87,13 @@ def _count_tokens(model: str, messages: list[dict[str, str]]) -> int:
 async def _get_context(user_id: str, message: str, max_tokens: int = MAX_MEMORY_TOKENS) -> str:
     """Return the assembled memory context string for *user_id*, or '' on failure."""
     try:
-        bundle = await _statewave_client().get_context(user_id, message, max_tokens=max_tokens)
+        bundle = await _statewave_client().get_context(
+            user_id,
+            message,
+            max_tokens=max_tokens,
+            caller_id="personal_assistant",
+            caller_type="chat",
+        )
         return bundle.assembled_context
     except sw.StatewaveError as exc:
         logger.warning("Statewave get_context failed for %s: %s", user_id, exc)

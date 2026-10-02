@@ -77,6 +77,13 @@ async def test_get_context(sw_client: StatewaveClient, mock_sdk: AsyncMock) -> N
     assert bundle.facts[0].kind == "profile_fact"
     assert "senior engineer" in bundle.assembled_context.lower()
     assert bundle.memories == bundle.facts
+    mock_sdk.get_context.assert_awaited_once_with(
+        "user_1",
+        "",
+        max_tokens=500,
+        caller_id="personal_assistant",
+        caller_type="chat",
+    )
 
 
 @pytest.mark.asyncio

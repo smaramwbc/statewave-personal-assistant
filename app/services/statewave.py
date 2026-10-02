@@ -113,6 +113,8 @@ class StatewaveClient:
                 subject_id,
                 task,
                 max_tokens=max_tokens or settings.statewave_max_tokens,
+                caller_id="personal_assistant",
+                caller_type="chat",
             )
         except sw.StatewaveError as exc:
             raise _wrap(exc) from exc
