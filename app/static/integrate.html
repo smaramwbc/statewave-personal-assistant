@@ -355,7 +355,7 @@
 curl -O http://localhost:8000/static/statewave_integration.py
 
 <span class="cm"># 2. Set env vars (.env or shell)</span>
-OPENAI_API_KEY=sk-...
+LLM_API_KEY=sk-...
 STATEWAVE_BASE_URL=http://localhost:8100   <span class="cm"># or your hosted URL</span>
 STATEWAVE_API_KEY=                         <span class="cm"># optional for self-hosted</span></pre>
       </div>
@@ -552,7 +552,7 @@ reply = <span class="kw">await</span> chain.ainvoke({
         <tr><td>STATEWAVE_BASE_URL</td><td>http://localhost:8100</td><td>Statewave server URL</td></tr>
         <tr><td>STATEWAVE_API_KEY</td><td>(empty)</td><td>API key — optional for self-hosted</td></tr>
         <tr><td>STATEWAVE_MAX_TOKENS</td><td>800</td><td>Max context tokens per request</td></tr>
-        <tr><td>OPENAI_API_KEY</td><td>(required)</td><td>Your OpenAI key</td></tr>
+        <tr><td>LLM_API_KEY</td><td>(required)</td><td>Your OpenAI LLM API key</td></tr>
         <tr><td>OPENAI_MODEL</td><td>gpt-4o-mini</td><td>Model used by the wrapper</td></tr>
       </table>
     </div>
