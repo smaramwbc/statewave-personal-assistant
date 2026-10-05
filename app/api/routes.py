@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from collections.abc import AsyncIterator
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -18,8 +19,9 @@ router = APIRouter()
 # ── dependency factories ──────────────────────────────────────────────────────
 
 
-def get_statewave() -> StatewaveClient:
-    return StatewaveClient()
+async def get_statewave() -> AsyncIterator[StatewaveClient]:
+    async with StatewaveClient() as sw:
+        yield sw
 
 
 def get_llm() -> LLMService:
