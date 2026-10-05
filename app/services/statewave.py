@@ -23,7 +23,8 @@ logger = logging.getLogger(__name__)
 
 _TIMEOUT = 30.0
 _RETRY = sw.RetryConfig(max_retries=3, backoff_base=0.5, jitter=True)
-_SEARCH_LIMIT = 1000
+# The server's GET /v1/memories/search endpoint caps limit at 500.
+_SEARCH_LIMIT = 500
 
 
 class StatewaveError(Exception):
@@ -125,7 +126,7 @@ class StatewaveClient:
         )
 
     async def list_memories(self, subject_id: str) -> UserMemoryState:
-        """Return the full compiled memory state for *subject_id*."""
+        """Return up to 500 compiled memories for *subject_id*."""
         try:
             result = await self._sdk.search_memories(subject_id, limit=_SEARCH_LIMIT)
         except sw.StatewaveError as exc:

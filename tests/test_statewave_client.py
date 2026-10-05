@@ -114,9 +114,28 @@ async def test_list_memories(sw_client: StatewaveClient, mock_sdk: AsyncMock) ->
     mock_sdk.search_memories.return_value = sw.SearchResult(memories=[make_memory()])
     state = await sw_client.list_memories("user_1")
 
+    mock_sdk.search_memories.assert_awaited_once_with("user_1", limit=500)
     assert state.total_memories == 1
     assert state.memories_by_type == {"profile_fact": 1}
     assert state.entries[0].id == str(MEM_ID)
+
+
+@pytest.mark.asyncio
+async def test_list_memories_empty_result(sw_client: StatewaveClient, mock_sdk: AsyncMock) -> None:
+    mock_sdk.search_memories.return_value = sw.SearchResult(memories=[])
+    state = await sw_client.list_memories("user_1")
+    mock_sdk.search_memories.assert_awaited_once_with("user_1", limit=500)
+    assert state.total_memories == 0
+    assert state.memories_by_type == {}
+    assert state.entries == []
+
+
+@pytest.mark.asyncio
+async def test_list_memories_propagates_error(sw_client: StatewaveClient, mock_sdk: AsyncMock) -> None:
+    mock_sdk.search_memories.side_effect = sw.StatewaveAPIError(503, "unavailable", "Unavailable")
+    with pytest.raises(StatewaveError) as exc_info:
+        await sw_client.list_memories("user_1")
+    assert exc_info.value.status_code == 503
 
 
 @pytest.mark.asyncio
