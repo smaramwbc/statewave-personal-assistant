@@ -16,7 +16,7 @@ Requirements:
 Environment variables:
   STATEWAVE_BASE_URL   default: http://localhost:8100
   STATEWAVE_API_KEY    optional (leave blank for self-hosted)
-  OPENAI_API_KEY
+  LLM_API_KEY or OPENAI_API_KEY
   OPENAI_MODEL         default: gpt-4o-mini
 """
 
@@ -53,7 +53,7 @@ _statewave: sw.AsyncStatewaveClient | None = None
 def _openai_client() -> AsyncOpenAI:
     global _openai
     if _openai is None:
-        _openai = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
+        _openai = AsyncOpenAI(api_key=os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY", ""))
     return _openai
 
 
