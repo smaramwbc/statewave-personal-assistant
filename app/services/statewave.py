@@ -106,13 +106,22 @@ class StatewaveClient:
         subject_id: str,
         task: str = "",
         max_tokens: int | None = None,
+        caller_id: str = "chat",
+        caller_type: str = "chat",
     ) -> ContextBundle:
-        """Retrieve a ranked, token-bounded context bundle for *subject_id*."""
+        """Retrieve a ranked, token-bounded context bundle for *subject_id*.
+
+        Sends the caller identity (caller_id and caller_type). A tenant that
+        sets require_caller_identity rejects a request with no identity. A
+        policy rule in enforce mode matches on caller_type.
+        """
         try:
             bundle = await self._sdk.get_context(
                 subject_id,
                 task,
                 max_tokens=max_tokens or settings.statewave_max_tokens,
+                caller_id=caller_id,
+                caller_type=caller_type,
             )
         except sw.StatewaveError as exc:
             raise _wrap(exc) from exc

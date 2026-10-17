@@ -31,7 +31,9 @@ async def test_get_context_maps_assembled_context(mock_sdk: AsyncMock) -> None:
     context = await statewave_integration._get_context("user_1", "hi", max_tokens=500)
 
     assert context == "User likes Python."
-    mock_sdk.get_context.assert_awaited_once_with("user_1", "hi", max_tokens=500)
+    mock_sdk.get_context.assert_awaited_once_with(
+        "user_1", "hi", max_tokens=500, caller_id="chat", caller_type="chat"
+    )
 
 
 @pytest.mark.asyncio
